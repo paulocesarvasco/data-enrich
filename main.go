@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"meli/constants"
 	"meli/models"
+	"net/http"
 	"os/user"
 	"path/filepath"
 )
@@ -26,8 +28,31 @@ func main() {
 		fmt.Printf("%+v\n", err) // output for debug
 
 	}
-	fmt.Printf("%+v\n", records) // output for debug
 
+	sourceIP := records.Records[0].SourceIPAddress
+
+	url := "https://api.ip2country.info/ip?" + sourceIP
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("%+v\n", err) // output for debug
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Printf("%+v\n", err) // output for debug
+	}
+
+	var ip2countryResponse models.Ip2CountryResponse
+	// Unmarshal request body
+	err = json.Unmarshal(body, &ip2countryResponse)
+	if err != nil {
+		fmt.Printf("%+v\n", err) // output for debug
+	}
+
+	fmt.Printf("%+v\n", getCountryRegion(ip2countryResponse.CountryName)) // output for debug
+
+	resp.Body.Close()
+}
 
 func getCountryRegion(country string) string {
 
