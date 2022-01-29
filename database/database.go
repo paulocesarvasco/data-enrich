@@ -15,17 +15,22 @@ var dbClient *mongo.Client
 var dbCollection *mongo.Collection
 var ctx context.Context
 
-	dbClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+func CreateDatabaseInstance(uri string) error {
+
+	ctx = context.TODO()
+
+	var err error
+	dbClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = dbClient.Ping(context.TODO(), readpref.Primary())
+	err = dbClient.Ping(ctx, readpref.Primary())
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return dbClient, nil
+	return nil
 }
 
 func CreateDatabaseCollection(dbClient *mongo.Client, dbName string, collectionName string) *mongo.Collection {
