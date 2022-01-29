@@ -32,6 +32,9 @@ func main() {
 	sourceIP := records.Records[0].SourceIPAddress
 
 	url := "https://api.ip2country.info/ip?" + sourceIP
+
+func getCountryFromIp(ip string) string {
+	url := "https://api.ip2country.info/ip?" + ip
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Printf("%+v\n", err) // output for debug
@@ -49,9 +52,9 @@ func main() {
 		fmt.Printf("%+v\n", err) // output for debug
 	}
 
-	fmt.Printf("%+v\n", getCountryRegion(ip2countryResponse.CountryName)) // output for debug
-
 	resp.Body.Close()
+
+	return ip2countryResponse.CountryName
 }
 
 func getCountryRegion(country string) string {
