@@ -33,20 +33,52 @@ func CreateDatabaseInstance(uri string) error {
 	return nil
 }
 
-func CreateDatabaseCollection(dbClient *mongo.Client, dbName string, collectionName string) *mongo.Collection {
+func CreateDatabaseCollection(dbName string, collectionName string) error {
 
-	dbCollection := dbClient.Database(dbName).Collection(collectionName)
+	if dbClient == nil {
+		return fmt.Errorf("db client not initialized")
+	}
 
-	return dbCollection
+	dbCollection = dbClient.Database(dbName).Collection(collectionName)
+
+	return nil
 }
 
-func PostDataOnDatabase(dbCollection *mongo.Collection, data interface{}) error {
+func SaveDataOnDatabase(data interface{}) error {
 
-	_, err := dbCollection.InsertOne(context.TODO(), data)
+	_, err := dbCollection.InsertOne(ctx, data)
 	// check for errors in the insertion
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, error) {
+
+	cur, err := dbCollection.Find(ctx, bson.D{})
+	if err != nil {
+		return nil, err
+	}
+
+	defer cur.Close(ctx)
+
+	var allRecords []models.CloudtrailData
+	var lastRecords []models.CloudtrailData
+
+	err = cur.All(ctx, &allRecords)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(allRecords) <= 10 {
+		return allRecords, nil
+	}
+
+	for i := len(allRecords) - 1; i >= len(allRecords)-numRegisters; i-- {
+		lastRecords = append(lastRecords, allRecords[i])
+	}
+
+	return lastRecords, nil
 }
