@@ -17,6 +17,7 @@ type Records struct {
 	UserAgent         string            `json:"userAgent"`
 	RequestParameters RequestParameters `json:"requestParameters"`
 	ResponseElements  ResponseElements  `json:"responseElements"`
+	Enrichment        Enrichment        `json:"enrichment"`
 }
 
 type UserIdentity struct {
@@ -68,4 +69,9 @@ type Country struct {
 type Name struct {
 	Common   string `json:"common"`
 	Official string `json:"official"`
+}
+
+type Enrichment struct {
+	Country string `json:"country"`
+	Region  string `json:"region"`
 }
