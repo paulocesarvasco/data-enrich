@@ -5,13 +5,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"meli/constants"
+	"meli/database"
 	"meli/models"
 	"net/http"
 	"os/user"
 	"path/filepath"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+var dbClient *mongo.Client
+var dbCollection *mongo.Collection
+
 func main() {
+
+	var err error
+
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	path := filepath.Join(dir, "input.json")
@@ -26,12 +35,32 @@ func main() {
 	err = json.Unmarshal(file, &records)
 	if err != nil {
 		fmt.Printf("%+v\n", err) // output for debug
-
 	}
+
+	dbClient, err = database.CreateDatabaseInstance("mongodb://localhost:27017")
+	if err != nil {
+		fmt.Printf("%+v\n", err) // output for debug
+	}
+
+	dbcollection := database.CreateDatabaseCollection(dbClient, "CloudtrailRecords", "records")
 
 	sourceIP := records.Records[0].SourceIPAddress
 
-	url := "https://api.ip2country.info/ip?" + sourceIP
+	country := getCountryFromIp(sourceIP)
+
+	region := getCountryRegion(country)
+	enrichiment := models.Enrichment{
+		Country: country,
+		Region:  region,
+	}
+
+	records.Records[0].Enrichment = enrichiment
+
+	err = database.PostDataOnDatabase(dbcollection, records)
+	if err != nil {
+		fmt.Printf("%+v\n", err) // output for debug
+	}
+}
 
 func getCountryFromIp(ip string) string {
 	url := "https://api.ip2country.info/ip?" + ip
