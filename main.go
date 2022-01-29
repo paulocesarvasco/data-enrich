@@ -1,127 +1,25 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"meli/constants"
+
+	"meli/connection"
 	"meli/database"
-	"meli/models"
-	"net/http"
-	"os/user"
-	"path/filepath"
-
-	"go.mongodb.org/mongo-driver/mongo"
 )
-
-var dbClient *mongo.Client
-var dbCollection *mongo.Collection
 
 func main() {
 
 	var err error
 
-	usr, _ := user.Current()
-	dir := usr.HomeDir
-	path := filepath.Join(dir, "input.json")
-	file, err := ioutil.ReadFile(path)
-
+	err = database.CreateDatabaseInstance("mongodb://localhost:27017")
 	if err != nil {
 		fmt.Printf("%+v\n", err) // output for debug
 	}
 
-	var records models.CloudtrailData
-
-	err = json.Unmarshal(file, &records)
+	err = database.CreateDatabaseCollection("CloudtrailRecords", "records")
 	if err != nil {
 		fmt.Printf("%+v\n", err) // output for debug
 	}
 
-	dbClient, err = database.CreateDatabaseInstance("mongodb://localhost:27017")
-	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
-	}
-
-	dbcollection := database.CreateDatabaseCollection(dbClient, "CloudtrailRecords", "records")
-
-	sourceIP := records.Records[0].SourceIPAddress
-
-	country := getCountryFromIp(sourceIP)
-
-	region := getCountryRegion(country)
-	enrichiment := models.Enrichment{
-		Country: country,
-		Region:  region,
-	}
-
-	records.Records[0].Enrichment = enrichiment
-
-	err = database.PostDataOnDatabase(dbcollection, records)
-	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
-	}
-}
-
-func getCountryFromIp(ip string) string {
-	url := "https://api.ip2country.info/ip?" + ip
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
-	}
-
-	var ip2countryResponse models.Ip2CountryResponse
-	// Unmarshal request body
-	err = json.Unmarshal(body, &ip2countryResponse)
-	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
-	}
-
-	resp.Body.Close()
-
-	return ip2countryResponse.CountryName
-}
-
-func getCountryRegion(country string) string {
-
-	i := 0
-	for {
-		regionName := constants.Region(i).String()
-		if regionName == "" {
-			fmt.Printf("%+v\n", "Região não encontrada") // output for debug
-			return ""
-		}
-		url := "https://restcountries.com/v3.1/region/" + regionName
-
-		resp, err := http.Get(url)
-		if err != nil {
-			fmt.Printf("%+v\n", err) // output for debug
-		}
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Printf("%+v\n", err) // output for debug
-		}
-
-		var countryList []models.Country
-		// Unmarshal request body
-		err = json.Unmarshal(body, &countryList)
-		if err != nil {
-			fmt.Printf("%+v\n", err) // output for debug
-		}
-
-		defer resp.Body.Close()
-
-		for _, countryInfo := range countryList {
-			if country == countryInfo.Name.Common {
-				return countryInfo.Region
-			}
-		}
-
-		i++
-	}
+	connection.HandleRequests()
 }
