@@ -3,13 +3,17 @@ package database
 import (
 	"context"
 	"fmt"
+	"meli/models"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func CreateDatabaseInstance(uri string) (*mongo.Client, error) {
+var dbClient *mongo.Client
+var dbCollection *mongo.Collection
+var ctx context.Context
 
 	dbClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
