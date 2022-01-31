@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	cte "meli/constants"
 	"meli/database"
 	"meli/models"
 	"meli/utils"
@@ -14,20 +15,12 @@ import (
 )
 
 func HandleRequests() {
-	// creates a new instance of a mux router
-	myRouter := mux.NewRouter().StrictSlash(true)
-	// replace http.HandleFunc with myRouter.HandleFunc
-	myRouter.HandleFunc("/input", saveDataOnDb).Methods("POST").Schemes("http")
-	myRouter.HandleFunc("/get", getData).Methods("GET").Schemes("http")
-	// finally, instead of passing in nil, we want
-	// to pass in our newly created router as the second
-	// argument
-	log.Fatal(http.ListenAndServe(":10000", myRouter))
-}
+	r := mux.NewRouter().StrictSlash(true)
 
-func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
-	fmt.Println("Endpoint Hit: homePage")
+	r.HandleFunc("/input", saveDataOnDb).Methods(http.MethodPost).Schemes("http").Headers("Content-Type", "application/json")
+	r.HandleFunc("/get", getData).Methods(http.MethodGet).Schemes("http")
+
+	log.Fatal(http.ListenAndServe(":10000", r))
 }
 
 func saveDataOnDb(w http.ResponseWriter, r *http.Request) {
@@ -38,17 +31,17 @@ func saveDataOnDb(w http.ResponseWriter, r *http.Request) {
 
 	err := json.Unmarshal(reqBody, &record)
 	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
+		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToUnmarshallRequestBody)) // output for debug
 	}
 
 	country, err := utils.GetCountryFromIp(record.Records[0].SourceIPAddress)
 	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
+		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToRetriveCountryFromIp)) // output for debug
 	}
 
 	region, err := utils.GetCountryRegion(country)
 	if err != nil {
-		fmt.Printf("%+v\n", err) // output for debug
+		fmt.Printf("%+v\n", cte.ErrorToRetriveRegionName) // output for debug
 	}
 
 	enrichiment := models.Enrichment{
@@ -60,24 +53,26 @@ func saveDataOnDb(w http.ResponseWriter, r *http.Request) {
 
 	err = database.SaveDataOnDatabase(record)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrortoSaveDataOnDatabase)) // output for debug
+
 	} else {
-		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Ok\n"))
 	}
-
 }
 
 func getData(w http.ResponseWriter, r *http.Request) {
 
-	records, err := database.RetriveLastDataFromDatabase(10)
+	numRecords := 10 // hard coded for now
+	records, err := database.RetriveLastDataFromDatabase(numRecords)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToRetrieveRecordsFromDb)) // output for debug
+
 	}
 
 	byteRecords, err := json.Marshal(records)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrortoEncodeDataFromDatabase)) // output for debug
+
 	} else {
 		w.Write(byteRecords)
 	}

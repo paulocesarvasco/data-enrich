@@ -2,9 +2,9 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
-	"meli/constants"
+	cte "meli/constants"
 	"meli/models"
 	"net/http"
 
@@ -18,7 +18,7 @@ func GetCountryFromIp(ip string) (string, error) {
 	url := "https://api.ip2country.info/ip?" + ip
 	resp, err := http.Get(url)
 	if err != nil {
-		return "", err
+		return "", WrapError(err, cte.ErrorToRetrieveDataFromUri)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -30,7 +30,7 @@ func GetCountryFromIp(ip string) (string, error) {
 	// Unmarshal request body
 	err = json.Unmarshal(body, &ip2countryResponse)
 	if err != nil {
-		return "", err
+		return "", WrapError(err, cte.FailToReadHttpResponseBody)
 	}
 
 	resp.Body.Close()
@@ -42,27 +42,27 @@ func GetCountryRegion(country string) (string, error) {
 
 	i := 0
 	for {
-		regionName := constants.Region(i).String()
+		regionName := cte.Region(i).String()
 		if regionName == "" {
-			return "", fmt.Errorf("Regiao nao encontrada")
+			return "", errors.New(cte.RegionNotFound)
 		}
 		url := "https://restcountries.com/v3.1/region/" + regionName
 
 		resp, err := http.Get(url)
 		if err != nil {
-			return "", err
+			return "", WrapError(err, cte.ErrorToRetrieveDataFromUri)
 		}
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return "", err
+			return "", WrapError(err, cte.FailToReadHttpResponseBody)
 		}
 
 		var countryList []models.Country
 		// Unmarshal request body
 		err = json.Unmarshal(body, &countryList)
 		if err != nil {
-			return "", err
+			return "", WrapError(err, cte.ErrorToUnmarshallRequestBody)
 		}
 
 		defer resp.Body.Close()

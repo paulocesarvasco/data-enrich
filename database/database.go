@@ -2,8 +2,10 @@ package database
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	cte "meli/constants"
 	"meli/models"
+	"meli/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,12 +24,12 @@ func CreateDatabaseInstance(uri string) error {
 	var err error
 	dbClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
-		return err
+		return utils.WrapError(err, cte.ErrorToEstablishDatabaseConnection)
 	}
 
 	err = dbClient.Ping(ctx, readpref.Primary())
 	if err != nil {
-		return err
+		return utils.WrapError(err, cte.ErrorTestingConnectionWithDB)
 	}
 
 	return nil
@@ -36,7 +38,7 @@ func CreateDatabaseInstance(uri string) error {
 func CreateDatabaseCollection(dbName string, collectionName string) error {
 
 	if dbClient == nil {
-		return fmt.Errorf("db client not initialized")
+		return errors.New(cte.DatabaseClientNotInitialized)
 	}
 
 	dbCollection = dbClient.Database(dbName).Collection(collectionName)
@@ -47,9 +49,8 @@ func CreateDatabaseCollection(dbName string, collectionName string) error {
 func SaveDataOnDatabase(data interface{}) error {
 
 	_, err := dbCollection.InsertOne(ctx, data)
-	// check for errors in the insertion
 	if err != nil {
-		return err
+		return utils.WrapError(err, cte.ErrortoSaveDataOnDatabase)
 	}
 
 	return nil
@@ -59,7 +60,7 @@ func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, err
 
 	cur, err := dbCollection.Find(ctx, bson.D{})
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, cte.CollectionNotFound)
 	}
 
 	defer cur.Close(ctx)
@@ -69,7 +70,7 @@ func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, err
 
 	err = cur.All(ctx, &allRecords)
 	if err != nil {
-		return nil, err
+		return nil, utils.WrapError(err, cte.ErrorToRetrieveRecordsFromDb)
 	}
 
 	if len(allRecords) <= 10 {
