@@ -76,3 +76,7 @@ func GetCountryRegion(country string) (string, error) {
 		i++
 	}
 }
+
+func WrapError(err error, msg string) error {
+	return errors.New(msg + ": " + err.Error())
+}
