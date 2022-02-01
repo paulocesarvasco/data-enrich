@@ -17,5 +17,5 @@ var CollectionNotFound = "Couldn't find the collection"
 var ErrorToRetrieveRecordsFromDb = "Failed when trying to retrieve data from the database"
 
 var ErrorToRetrieveDataFromUri = "Unable to retrieve data from URI"
-var FailToReadHttpResponseBody = "Couldn't read data from http response"
+var FailToReadHttpResponseBody = "Couldn't parse data from http response"
 var RegionNotFound = "Unknown region"
