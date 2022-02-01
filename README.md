@@ -63,3 +63,8 @@ export input=/path/to/json/file
 ```
 curl -X GET http://127.0.0.1:8080/get
 ```
+## Unit Test
+A unit test was written as an exercise, to run it:
+```
+docker exec meli_rest_app_1 go test ./... -v
+```
