@@ -88,7 +88,7 @@ func getData(w http.ResponseWriter, r *http.Request) {
 		w.Write(byteRecords)
 	}
 
-	logMessage := cte.DataRetrieved + r.RemoteAddr
+	logMessage := cte.DataRetrieved + r.Host
 	log.Println(logMessage)
 
 }
