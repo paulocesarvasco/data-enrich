@@ -21,6 +21,8 @@ func GetCountryFromIp(ip string) (string, error) {
 		return "", WrapError(err, cte.ErrorToRetrieveDataFromUri)
 	}
 
+	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
@@ -32,8 +34,6 @@ func GetCountryFromIp(ip string) (string, error) {
 	if err != nil {
 		return "", WrapError(err, cte.FailToReadHttpResponseBody)
 	}
-
-	resp.Body.Close()
 
 	return ip2countryResponse.CountryName, nil
 }
@@ -52,6 +52,8 @@ func GetCountryRegion(country string) (string, error) {
 		if err != nil {
 			return "", WrapError(err, cte.ErrorToRetrieveDataFromUri)
 		}
+
+		defer resp.Body.Close()
 
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
