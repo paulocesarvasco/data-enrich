@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+    rest_app:
+        build: .
+        networks:
+            - containers_network
+        ports:
+            - 8080:8080
+    mongodb:
+        image: mongo
+        container_name: mongo_container
+        networks:
+            - containers_network
+        ports:
+            - 27017:27017
+        volumes:
+            - mongo_volume
+
+networks:
+    containers_network:
+        driver: bridge
