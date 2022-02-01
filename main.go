@@ -13,7 +13,7 @@ func main() {
 
 	var err error
 
-	err = database.CreateDatabaseInstance("mongodb://localhost:27017")
+	err = database.CreateDatabaseInstance("mongodb://mongodb:27017")
 	if err != nil {
 		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToCreateDatabaseInstace))
 	}
