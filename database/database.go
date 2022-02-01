@@ -17,16 +17,20 @@ var dbClient *mongo.Client
 var dbCollection *mongo.Collection
 var ctx context.Context
 
+// Initialize a new database client to connect from given uri
 func CreateDatabaseInstance(uri string) error {
 
 	ctx = context.TODO()
 
 	var err error
+
+	// Initialize db client
 	dbClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
 	if err != nil {
 		return utils.WrapError(err, cte.ErrorToEstablishDatabaseConnection)
 	}
 
+	// Test connection between server and client db
 	err = dbClient.Ping(ctx, readpref.Primary())
 	if err != nil {
 		return utils.WrapError(err, cte.ErrorTestingConnectionWithDB)
@@ -35,6 +39,7 @@ func CreateDatabaseInstance(uri string) error {
 	return nil
 }
 
+// Create a new database and collection from this db
 func CreateDatabaseCollection(dbName string, collectionName string) error {
 
 	if dbClient == nil {
@@ -46,6 +51,7 @@ func CreateDatabaseCollection(dbName string, collectionName string) error {
 	return nil
 }
 
+// Stores data on previous collection initialized
 func SaveDataOnDatabase(data interface{}) error {
 
 	_, err := dbCollection.InsertOne(ctx, data)
@@ -56,6 +62,7 @@ func SaveDataOnDatabase(data interface{}) error {
 	return nil
 }
 
+// Get last records from database. numRegisters indicates how many records must be retrieved
 func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, error) {
 
 	cur, err := dbCollection.Find(ctx, bson.D{})
@@ -73,6 +80,7 @@ func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, err
 		return nil, utils.WrapError(err, cte.ErrorToRetrieveRecordsFromDb)
 	}
 
+	// Edge case for when less than 10 records are stored
 	if len(allRecords) <= 10 {
 		return allRecords, nil
 	}

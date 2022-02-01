@@ -10,6 +10,7 @@ const (
 	Oceania
 )
 
+// Converts region name to a string in lowercase
 func (r Region) String() string {
 	switch r {
 	case Africa:
