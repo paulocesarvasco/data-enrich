@@ -20,7 +20,7 @@ func HandleRequests() {
 	r.HandleFunc("/input", saveDataOnDb).Methods(http.MethodPost).Schemes("http").Headers("Content-Type", "application/json")
 	r.HandleFunc("/get", getData).Methods(http.MethodGet).Schemes("http")
 
-	log.Fatal(http.ListenAndServe(":10000", r))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func saveDataOnDb(w http.ResponseWriter, r *http.Request) {
