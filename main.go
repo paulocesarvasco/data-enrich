@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"meli/connection"
 	cte "meli/constants"
@@ -13,15 +13,16 @@ func main() {
 
 	var err error
 
-	err = database.CreateDatabaseInstance("mongodb://mongodb:27017")
+	err = database.CreateDatabaseInstance("mongodb://127.0.0.1:27017")
 	if err != nil {
-		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToCreateDatabaseInstace))
+		log.Fatal(utils.WrapError(err, cte.ErrorToCreateDatabaseInstace))
 	}
 
 	err = database.CreateDatabaseCollection("CloudtrailRecords", "records")
 	if err != nil {
-		fmt.Printf("%+v\n", utils.WrapError(err, cte.ErrorToCreateDatabaseCollection)) // output for debug
+		log.Fatal(utils.WrapError(err, cte.ErrorToCreateDatabaseCollection))
 	}
 
+	log.Println(cte.ConnectionWithDbEstablish)
 	connection.HandleRequests()
 }
