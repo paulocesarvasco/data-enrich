@@ -27,3 +27,5 @@ func (r Region) String() string {
 		return ""
 	}
 }
+
+const NUM_RECORDS int = 10
