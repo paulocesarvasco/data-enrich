@@ -1,8 +1,6 @@
-# syntax=docker/dockerfile:1
+FROM golang:1.23
 
-FROM golang:1.17
-
-WORKDIR ./meli
+WORKDIR ./data-enrich
 
 copy go.mod .
 
@@ -10,8 +8,8 @@ COPY . .
 
 RUN go mod tidy -v
 
-run go build -o /meli
+run go build -o /data-enrich
 
 EXPOSE 8080
 
-CMD ["/meli"]
+CMD ["/data-enrich"]

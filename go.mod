@@ -1,6 +1,6 @@
-module meli
+module data-enrich
 
-go 1.17
+go 1.23
 
 require go.mongodb.org/mongo-driver v1.8.2
 

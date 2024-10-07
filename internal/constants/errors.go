@@ -9,6 +9,7 @@ var ErrorToRetriveRegionName = "Failed to get country region name"
 var ErrortoSaveDataOnDatabase = "Failed to store new record in the database"
 var ErrortoGetRecordsFromDatabase = "Couldn't retrieve data from database"
 var ErrortoEncodeDataFromDatabase = "Failed to encode data retrieved from database"
+var ErrorMissedMandatoryFields = "Source IP address necessary to enrich is missing"
 
 var ErrorToEstablishDatabaseConnection = "Couldn't establish connection with database service"
 var ErrorTestingConnectionWithDB = "Database connection not responding"
