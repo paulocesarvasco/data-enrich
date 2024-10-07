@@ -29,3 +29,5 @@ func (r Region) String() string {
 }
 
 const NUM_RECORDS int = 10
+const IP_API_ADDRESS string = "https://api.ip2country.info/ip?"
+const REGION_API_ADDRESS string = "https://restcountries.com/v3.1/region/"
