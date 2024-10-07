@@ -2,10 +2,10 @@ package database
 
 import (
 	"context"
+	cte "data-enrich/constants"
+	"data-enrich/models"
+	"data-enrich/utils"
 	"errors"
-	cte "meli/constants"
-	"meli/models"
-	"meli/utils"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

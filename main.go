@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"meli/connection"
-	cte "meli/constants"
-	"meli/database"
-	"meli/utils"
+	"data-enrich/connection"
+	cte "data-enrich/constants"
+	"data-enrich/database"
+	"data-enrich/utils"
 )
 
 func main() {

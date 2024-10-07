@@ -2,14 +2,14 @@ package connection
 
 import (
 	"crypto/sha256"
+	cte "data-enrich/constants"
+	"data-enrich/database"
+	"data-enrich/models"
+	"data-enrich/utils"
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"log"
-	cte "meli/constants"
-	"meli/database"
-	"meli/models"
-	"meli/utils"
 	"net/http"
 
 	"github.com/gorilla/mux"

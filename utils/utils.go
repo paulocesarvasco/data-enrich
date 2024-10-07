@@ -1,11 +1,11 @@
 package utils
 
 import (
+	cte "data-enrich/constants"
+	"data-enrich/models"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	cte "meli/constants"
-	"meli/models"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
