@@ -1,8 +1,8 @@
 package utils
 
 import (
-	cte "data-enrich/constants"
-	"data-enrich/models"
+	cte "data-enrich/internal/constants"
+	"data-enrich/internal/models"
 	"encoding/json"
 	"errors"
 	"io/ioutil"

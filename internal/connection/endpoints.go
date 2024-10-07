@@ -2,10 +2,10 @@ package connection
 
 import (
 	"crypto/sha256"
-	cte "data-enrich/constants"
-	"data-enrich/database"
-	"data-enrich/models"
-	"data-enrich/utils"
+	cte "data-enrich/internal/constants"
+	"data-enrich/internal/database"
+	"data-enrich/internal/models"
+	"data-enrich/internal/utils"
 	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"

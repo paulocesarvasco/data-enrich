@@ -3,10 +3,10 @@ package main
 import (
 	"log"
 
-	"data-enrich/connection"
-	cte "data-enrich/constants"
-	"data-enrich/database"
-	"data-enrich/utils"
+	"data-enrich/internal/connection"
+	cte "data-enrich/internal/constants"
+	"data-enrich/internal/database"
+	"data-enrich/internal/utils"
 )
 
 func main() {

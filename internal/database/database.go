@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	cte "data-enrich/constants"
-	"data-enrich/models"
-	"data-enrich/utils"
+	cte "data-enrich/internal/constants"
+	"data-enrich/internal/models"
+	"data-enrich/internal/utils"
 	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
