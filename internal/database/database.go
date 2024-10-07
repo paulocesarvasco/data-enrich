@@ -5,7 +5,6 @@ import (
 	cte "data-enrich/internal/constants"
 	"data-enrich/internal/models"
 	"data-enrich/internal/utils"
-	"errors"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -13,63 +12,53 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var dbClient *mongo.Client
-var dbCollection *mongo.Collection
-var ctx context.Context
+type DB interface {
+	Save(ctx context.Context, data any) error
+	RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error)
+}
 
-// Initialize a new database client to connect from given uri
-func CreateDatabaseInstance(uri string) error {
+type db struct {
+	client     *mongo.Client
+	collection *mongo.Collection
+}
 
-	ctx = context.TODO()
-
-	var err error
+func NewClient() (*db, error) {
 
 	// Initialize db client
-	dbClient, err = mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	dbClient, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://mongodb:27017"))
 	if err != nil {
-		return utils.WrapError(err, cte.ErrorToEstablishDatabaseConnection)
+		return nil, utils.WrapError(err, cte.ErrorToEstablishDatabaseConnection)
 	}
 
 	// Test connection between server and client db
-	err = dbClient.Ping(ctx, readpref.Primary())
+	err = dbClient.Ping(context.Background(), readpref.Primary())
 	if err != nil {
-		return utils.WrapError(err, cte.ErrorTestingConnectionWithDB)
+		return nil, utils.WrapError(err, cte.ErrorTestingConnectionWithDB)
 	}
 
-	return nil
-}
+	dbCollection := dbClient.Database("CloudtrailRecords").Collection("records")
 
-// Create a new database and collection from this db
-func CreateDatabaseCollection(dbName string, collectionName string) error {
+	return &db{
+		client:     dbClient,
+		collection: dbCollection}, nil
 
-	if dbClient == nil {
-		return errors.New(cte.DatabaseClientNotInitialized)
-	}
-
-	dbCollection = dbClient.Database(dbName).Collection(collectionName)
-
-	return nil
 }
 
 // Stores data on previous collection initialized
-func SaveDataOnDatabase(data interface{}) error {
-
-	_, err := dbCollection.InsertOne(ctx, data)
+func (d *db) Save(ctx context.Context, data interface{}) error {
+	_, err := d.collection.InsertOne(ctx, data)
 	if err != nil {
 		return utils.WrapError(err, cte.ErrortoSaveDataOnDatabase)
 	}
-
 	return nil
 }
 
 // Get last records from database. numRegisters indicates how many records must be retrieved
-func RetriveLastDataFromDatabase(numRegisters int) ([]models.CloudtrailData, error) {
-
-	cur, err := dbCollection.Find(ctx, bson.D{})
+func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error) {
+	cur, err := d.collection.Find(ctx, bson.D{})
 	if err != nil {
 		return nil, utils.WrapError(err, cte.CollectionNotFound)
 	}
-
 	defer cur.Close(ctx)
 
 	var allRecords []models.CloudtrailData
