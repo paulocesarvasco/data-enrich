@@ -2,9 +2,10 @@ package utils
 
 import (
 	cte "data-enrich/internal/constants"
+	"data-enrich/internal/errors"
 	"data-enrich/internal/models"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -14,7 +15,7 @@ func GetCountryFromIp(ip string) (string, error) {
 	resp, err := http.Get(cte.IP_API_ADDRESS + ip)
 	if err != nil {
 		log.Print(err)
-		return "", errors.New(cte.ErrorToRetrieveDataFromUri)
+		return "", errors.ErrorToRetrieveDataFromUri
 	}
 	defer resp.Body.Close()
 
@@ -22,7 +23,7 @@ func GetCountryFromIp(ip string) (string, error) {
 	err = json.NewDecoder(resp.Body).Decode(&ip2countryResponse)
 	if err != nil {
 		log.Print(err)
-		return "", errors.New(cte.FailToReadHttpResponseBody)
+		return "", errors.ErrorFailToReadHttpResponseBody
 	}
 	return ip2countryResponse.CountryName, nil
 }
@@ -34,14 +35,14 @@ func GetCountryRegion(country string) (string, error) {
 	for {
 		regionName := cte.Region(i).String()
 		if regionName == "" {
-			return "", errors.New(cte.RegionNotFound)
+			return "", errors.ErrorRegionNotFound
 		}
 
 		// Read http response
 		resp, err := http.Get(cte.REGION_API_ADDRESS + regionName)
 		if err != nil {
 			log.Print(err)
-			return "", errors.New(cte.ErrorToRetrieveDataFromUri)
+			return "", errors.ErrorToRetrieveDataFromUri
 		}
 
 		defer resp.Body.Close()
@@ -51,7 +52,7 @@ func GetCountryRegion(country string) (string, error) {
 		err = json.NewDecoder(resp.Body).Decode(&countryList)
 		if err != nil {
 			log.Print(err)
-			return "", errors.New(cte.ErrorToUnmarshallRequestBody)
+			return "", errors.ErrorToUnmarshallRequestBody
 		}
 
 		// Linear search by country name in the region data
@@ -66,5 +67,5 @@ func GetCountryRegion(country string) (string, error) {
 
 // Concatenate error messages and return a new error
 func WrapError(err error, msg string) error {
-	return errors.New(msg + ": " + err.Error())
+	return fmt.Errorf(msg + ": " + err.Error())
 }

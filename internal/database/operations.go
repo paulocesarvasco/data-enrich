@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	cte "data-enrich/internal/constants"
+	"data-enrich/internal/errors"
 	"data-enrich/internal/models"
-	"data-enrich/internal/utils"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -13,7 +13,8 @@ import (
 func (d *db) Save(ctx context.Context, data any) error {
 	_, err := d.collection.InsertOne(ctx, data)
 	if err != nil {
-		return utils.WrapError(err, cte.ErrortoSaveDataOnDatabase)
+		log.Print(err)
+		return errors.ErrorDatabaseOperationSave
 	}
 	return nil
 }
@@ -22,7 +23,7 @@ func (d *db) Save(ctx context.Context, data any) error {
 func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error) {
 	cur, err := d.collection.Find(ctx, bson.D{})
 	if err != nil {
-		return nil, utils.WrapError(err, cte.CollectionNotFound)
+		return nil, errors.ErrorCollectionNotFound
 	}
 	defer cur.Close(ctx)
 
@@ -31,7 +32,7 @@ func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]mode
 
 	err = cur.All(ctx, &allRecords)
 	if err != nil {
-		return nil, utils.WrapError(err, cte.ErrorToRetrieveRecordsFromDb)
+		return nil, errors.ErrorToRetrieveRecordsFromDb
 	}
 
 	// Edge case for when less than 10 records are stored
