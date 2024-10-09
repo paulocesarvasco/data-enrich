@@ -154,3 +154,55 @@ func TestEnrich(t *testing.T) {
 
 	}
 }
+
+func TestSearch(t *testing.T) {
+	tt := []struct {
+		name                string
+		searchResponse      []models.CloudtrailData
+		searchDatabaseError error
+		expectedBody        []models.CloudtrailData
+		expectedCode        int
+	}{
+		{
+			"success",
+			[]models.CloudtrailData{},
+			nil,
+			[]models.CloudtrailData{},
+			http.StatusOK,
+		},
+		{
+			"fail to search db",
+			[]models.CloudtrailData{},
+			errors.ErrorToRetrieveRecordsFromDb,
+			[]models.CloudtrailData{},
+			http.StatusInternalServerError,
+		},
+	}
+	for _, tc := range tt {
+		db := database.NewClient()
+		db.SetLastRegistersError(tc.searchDatabaseError)
+		db.SetLastResgistersResponse(tc.searchResponse)
+		a := api{
+			db: db,
+		}
+		r := mux.NewRouter()
+		r.Handle("/search", a.Search())
+
+		ts := httptest.NewServer(r)
+		defer ts.Close()
+
+		resp, err := http.Get(ts.URL + "/search")
+		if err != nil {
+			t.Fatalf("Failed to send request: %v", err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode != tc.expectedCode {
+			t.Errorf("TEST [%s] FAILED: expected code [%d] but received [%d]", tc.name, tc.expectedCode, resp.StatusCode)
+		}
+		// rawResp, _ := json.Marshal(resp.Body)
+		// expectedRawResp, _ := json.Marshal(tc.expectedBody)
+		// if !bytes.Equal(rawResp, expectedRawResp) {
+		// t.Errorf("TEST [%s] FAILED: expected body [%s] but received [%s]", tc.name, expectedRawResp, rawResp)
+		// }
+	}
+}

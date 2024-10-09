@@ -85,13 +85,9 @@ func (a *api) Search() http.HandlerFunc {
 		}
 
 		// Convert data retrieved to json format
-		byteRecords, err := json.Marshal(records)
-		if err != nil {
-			log.Print(err)
-			http.Error(w, cte.ErrorToRetrieveRecordsFromDb, http.StatusInternalServerError)
-			return
-		}
+		byteRecords, _ := json.Marshal(records)
 		w.Write(byteRecords)
+		w.WriteHeader(http.StatusOK)
 
 		// Log the IP of the requester
 		logMessage := cte.DataRetrieved + r.Host
