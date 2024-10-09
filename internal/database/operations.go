@@ -23,6 +23,7 @@ func (d *db) Save(ctx context.Context, data any) error {
 func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error) {
 	cur, err := d.collection.Find(ctx, bson.D{})
 	if err != nil {
+		log.Print(err)
 		return nil, errors.ErrorCollectionNotFound
 	}
 	defer cur.Close(ctx)
@@ -32,6 +33,7 @@ func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]mode
 
 	err = cur.All(ctx, &allRecords)
 	if err != nil {
+		log.Print(err)
 		return nil, errors.ErrorToRetrieveRecordsFromDb
 	}
 
