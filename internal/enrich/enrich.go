@@ -1,4 +1,4 @@
-package utils
+package enrich
 
 import (
 	cte "data-enrich/internal/constants"
@@ -10,7 +10,18 @@ import (
 	"net/http"
 )
 
-func GetCountryFromIp(ip string) (string, error) {
+type Enricher interface {
+	GetCountryFromIp(ip string) (string, error)
+	GetCountryRegion(countr string) (string, error)
+}
+
+type enrich struct{}
+
+func NewEnrichService() Enricher {
+	return &enrich{}
+}
+
+func (e *enrich) GetCountryFromIp(ip string) (string, error) {
 	// Make a get request to formatted url
 	resp, err := http.Get(cte.IP_API_ADDRESS + ip)
 	if err != nil {
@@ -28,7 +39,7 @@ func GetCountryFromIp(ip string) (string, error) {
 	return ip2countryResponse.CountryName, nil
 }
 
-func GetCountryRegion(country string) (string, error) {
+func (e *enrich) GetCountryRegion(country string) (string, error) {
 	// Searches for the country region by region and stops
 	// the search if the name of the country is present in the analyzed region
 	i := 0

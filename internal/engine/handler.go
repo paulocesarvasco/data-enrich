@@ -16,11 +16,16 @@ type API interface {
 }
 
 type api struct {
-	db database.DB
+	db     database.DB
+	enrich enrich.Enricher
 }
 
 func New() API {
-	return &api{}
+	dbClient, _ := database.NewClient()
+	return &api{
+		db:     dbClient,
+		enrich: enrich.NewEnrichService(),
+	}
 }
 
 // Enrich parses http request retrieve IPSource, gets Country and Region, send new data to db
@@ -39,14 +44,14 @@ func (a *api) Enrich() http.HandlerFunc {
 		}
 
 		// Get country name from IP
-		country, err := utils.GetCountryFromIp(record.Records[0].SourceIPAddress)
+		country, err := a.enrich.GetCountryFromIp(record.Records[0].SourceIPAddress)
 		if err != nil {
 			http.Error(w, cte.ErrorToRetriveCountryFromIp, http.StatusInternalServerError)
 			return
 		}
 
 		// Get region name from country name
-		region, err := utils.GetCountryRegion(country)
+		region, err := a.enrich.GetCountryRegion(country)
 		if err != nil {
 			http.Error(w, cte.ErrorToRetriveRegionName, http.StatusInternalServerError)
 			return
