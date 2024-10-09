@@ -20,7 +20,7 @@ func (d *db) Save(ctx context.Context, data any) error {
 }
 
 // Get last records from database. numRegisters indicates how many records must be retrieved
-func (d *db) RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error) {
+func (d *db) RetrieveLastRegisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error) {
 	cur, err := d.collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Print(err)

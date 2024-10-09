@@ -14,7 +14,7 @@ import (
 
 type DB interface {
 	Save(ctx context.Context, data any) error
-	RetriveLastregisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error)
+	RetrieveLastRegisters(ctx context.Context, numRegisters int) ([]models.CloudtrailData, error)
 }
 
 type db struct {

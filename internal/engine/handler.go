@@ -3,8 +3,8 @@ package engine
 import (
 	cte "data-enrich/internal/constants"
 	"data-enrich/internal/database"
+	"data-enrich/internal/enrich"
 	"data-enrich/internal/models"
-	"data-enrich/internal/utils"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -71,13 +71,14 @@ func (a *api) Enrich() http.HandlerFunc {
 			http.Error(w, cte.ErrorDatabaseOperationSave, http.StatusInternalServerError)
 			return
 		}
-		log.Println("data saved.")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ACK"))
 	}
 }
 
 func (a *api) Search() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		records, err := a.db.RetriveLastregisters(r.Context(), cte.NUM_RECORDS)
+		records, err := a.db.RetrieveLastRegisters(r.Context(), cte.NUM_RECORDS)
 		if err != nil {
 			http.Error(w, cte.ErrorToRetrieveRecordsFromDb, http.StatusInternalServerError)
 			return
