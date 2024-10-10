@@ -15,15 +15,21 @@ type Enricher interface {
 	GetCountryRegion(countr string) (string, error)
 }
 
-type enrich struct{}
+type enrich struct {
+	countryAPIAddress string
+	regionAPIAddress  string
+}
 
 func NewEnrichService() Enricher {
-	return &enrich{}
+	return &enrich{
+		countryAPIAddress: cte.IP_API_ADDRESS,
+		regionAPIAddress:  cte.REGION_API_ADDRESS,
+	}
 }
 
 func (e *enrich) GetCountryFromIp(ip string) (string, error) {
 	// Make a get request to formatted url
-	resp, err := http.Get(cte.IP_API_ADDRESS + ip)
+	resp, err := http.Get(e.countryAPIAddress + ip)
 	if err != nil {
 		log.Print(err)
 		return "", errors.ErrorToRetrieveDataFromUri
@@ -50,7 +56,7 @@ func (e *enrich) GetCountryRegion(country string) (string, error) {
 		}
 
 		// Read http response
-		resp, err := http.Get(cte.REGION_API_ADDRESS + regionName)
+		resp, err := http.Get(e.regionAPIAddress + regionName)
 		if err != nil {
 			log.Print(err)
 			return "", errors.ErrorToRetrieveDataFromUri
