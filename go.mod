@@ -4,6 +4,8 @@ go 1.23
 
 require go.mongodb.org/mongo-driver v1.8.2
 
+require github.com/google/go-cmp v0.5.2 // indirect
+
 require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
