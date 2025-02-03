@@ -20,14 +20,6 @@ jobs:
           go-version: 'stable'
           cache: true
 
-      - name: Cache Go Modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
       - name: Build
         env:
           GOPROXY: "https://proxy.golang.org"
@@ -36,7 +28,14 @@ jobs:
       - name: Run Tests with Coverage
         run: |
           go test -coverprofile=coverage.out -v ./...
-          go tool cover -func=coverage.out
+          coverage=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Total Coverage: $coverage%"
+    
+          min_coverage=80.0
+          if (( $(echo "$coverage < $min_coverage" | bc -l) )); then
+            echo "Test coverage is below ${min_coverage}%. Failing the workflow."
+            exit 1
+          fi
 
       - name: Check Formatting using go fmt
         run: |
